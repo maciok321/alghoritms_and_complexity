@@ -15,17 +15,33 @@ void runBenchmark(Data &movieData, int n, int iterations, SortAlgorithm algo, co
 
 int main()
 {
+    std::cout << "\n=== TEST ZLOZONOSCI WCZYTYWANIA (O(N)) ===" << std::endl;
+
+    // Tablica z rozmiarami, które chcemy przetestować
+    int testLimits[] = {1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000, 1024000};
+
+    for (int i = 0; i < 11; i++)
+    {
+        int limit = testLimits[i];
+        std::cout << "Test dla N = " << limit << "..." << std::endl;
+
+        Data testLoadData(limit + 100);
+
+        testLoadData.loadAndFilterData("projekt1_dane.csv", limit);
+    }
+    std::cout << "==========================================\n";
+
     Data movieData(1100000);
     movieData.loadAndFilterData("projekt1_dane.csv");
 
-    int n[4] = {10000, 100000, 500000, 1000000};
+    int n[5] = {10000, 100000, 500000, 1000000, movieData.currentSize};
     int iterations = 1;
     Sort sort;
 
     std::ofstream csvFile("benchmark_results.csv");
     csvFile << "Algorithm,N,AverageTime(ms),AverageRating,MedianRating\n";
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
     {
         runBenchmark(movieData, n[i], iterations, SortAlgorithm::QUICK_SORT, "QuickSort", csvFile);
         runBenchmark(movieData, n[i], iterations, SortAlgorithm::INTRO_SORT, "IntroSort", csvFile);
@@ -47,7 +63,7 @@ void runBenchmark(Data &movieData, int n, int iterations, SortAlgorithm algo, co
     int actualSize = 0;
 
     std::cout << "\n==========================================" << std::endl;
-    std::cout << " Starting test: " << algoName << " | N = " << n << std::endl;
+    std::cout << " Starting test for: " << algoName << " | N = " << n << std::endl;
     std::cout << "==========================================" << std::endl;
 
     for (int i = 0; i < iterations; i++)

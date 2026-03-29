@@ -19,7 +19,7 @@ Data::~Data()
 
 void Data::addMovie(const std::string &name, float rating)
 {
-    if (currentSize <= capacity)
+    if (currentSize < capacity)
     {
         data[currentSize].movie_name = name;
         data[currentSize].rating = rating;
@@ -31,7 +31,7 @@ void Data::addMovie(const std::string &name, float rating)
     }
 }
 
-void Data::loadAndFilterData(const std::string &filename)
+void Data::loadAndFilterData(const std::string &filename, int limit)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -46,6 +46,11 @@ void Data::loadAndFilterData(const std::string &filename)
 
     while (std::getline(file, line))
     {
+        if (limit != -1 && currentSize >= limit)
+        {
+            break;
+        }
+
         size_t lastComma = line.find_last_of(',');
         if (lastComma != std::string::npos)
         {

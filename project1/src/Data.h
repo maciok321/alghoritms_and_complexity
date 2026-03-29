@@ -21,7 +21,7 @@ public:
     ~Data();
 
     void addMovie(const std::string &name, float rating);
-    void loadAndFilterData(const std::string &filename);
+    void loadAndFilterData(const std::string &filename, int limit = -1);
     Data *getSubsetOfData(int subsetSize);
 };
 

@@ -32,13 +32,13 @@ int main()
     std::cout << "==========================================\n";
 
     Data movieData(1100000);
-    movieData.loadAndFilterData("projekt1_dane.csv");
+    movieData.loadAndFilterData("data/projekt1_dane.csv");
 
     int n[5] = {10000, 100000, 500000, 1000000, movieData.currentSize};
-    int iterations = 1;
+    int iterations = 5;
     Sort sort;
 
-    std::ofstream csvFile("benchmark_results.csv");
+    std::ofstream csvFile("data/benchmark_results.csv");
     csvFile << "Algorithm,N,AverageTime(ms),AverageRating,MedianRating\n";
 
     for (int i = 0; i < 5; i++)

@@ -13,6 +13,7 @@ main
 build/
 bin/
 obj/
+data/
 
 *.log
 *.tmp

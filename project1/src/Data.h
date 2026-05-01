@@ -2,9 +2,7 @@
 #define DATA_H
 #include <string>
 
-#pragma once
-
-struct Movie
+struct Movie // struktura przechowująca dane o filmie: nazwę i ocenę
 {
     std::string movie_name;
     float rating;

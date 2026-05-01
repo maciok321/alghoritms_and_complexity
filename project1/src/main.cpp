@@ -4,7 +4,7 @@
 #include <chrono>
 #include <fstream>
 
-enum class SortAlgorithm
+enum class SortAlgorithm // enum do wyboru algorytmu sortowania w funkcji benchmarkowej
 {
     QUICK_SORT,
     MERGE_SORT,
@@ -17,7 +17,6 @@ int main()
 {
     std::cout << "\n=== TEST ZLOZONOSCI WCZYTYWANIA (O(N)) ===" << std::endl;
 
-    // Tablica z rozmiarami, które chcemy przetestować
     int testLimits[] = {1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000, 1024000};
 
     for (int i = 0; i < 11; i++)
@@ -27,25 +26,34 @@ int main()
 
         Data testLoadData(limit + 100);
 
-        testLoadData.loadAndFilterData("projekt1_dane.csv", limit);
+        testLoadData.loadAndFilterData("data/csv/projekt1_dane.csv", limit); // wczytywanie danych z limitem, aby przetestować złożoność O(N)
     }
     std::cout << "==========================================\n";
 
     Data movieData(1100000);
-    movieData.loadAndFilterData("data/projekt1_dane.csv");
+    movieData.loadAndFilterData("data/csv/projekt1_dane.csv");
 
-    int n[5] = {10000, 100000, 500000, 1000000, movieData.currentSize};
-    int iterations = 5;
+    const int s = 5;
+    int n[s]{10000, 100000, 500000, 1000000, movieData.currentSize};
+    int iterations = 1;
     Sort sort;
 
-    std::ofstream csvFile("data/benchmark_results.csv");
+    std::ofstream csvFile("data/csv/benchmark_results.csv");
     csvFile << "Algorithm,N,AverageTime(ms),AverageRating,MedianRating\n";
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < s; i++)
     {
         runBenchmark(movieData, n[i], iterations, SortAlgorithm::QUICK_SORT, "QuickSort", csvFile);
-        runBenchmark(movieData, n[i], iterations, SortAlgorithm::INTRO_SORT, "IntroSort", csvFile);
+    }
+
+    for (int i = 0; i < s; i++)
+    {
         runBenchmark(movieData, n[i], iterations, SortAlgorithm::MERGE_SORT, "MergeSort", csvFile);
+    }
+
+    for (int i = 0; i < s; i++)
+    {
+        runBenchmark(movieData, n[i], iterations, SortAlgorithm::INTRO_SORT, "IntroSort", csvFile);
     }
 
     csvFile.close();
@@ -66,10 +74,10 @@ void runBenchmark(Data &movieData, int n, int iterations, SortAlgorithm algo, co
     std::cout << " Starting test for: " << algoName << " | N = " << n << std::endl;
     std::cout << "==========================================" << std::endl;
 
-    for (int i = 0; i < iterations; i++)
+    for (int i = 0; i < iterations; i++) // wykonanie kilku iteracji dla każdego algorytmu i rozmiaru danych dla lepszego pomiaru czasu sortowania
     {
         Data *testData = movieData.getSubsetOfData(n);
-        actualSize = testData->currentSize;
+        actualSize = testData->currentSize; // aktualny rozmiar danych mozliwe ze mniejszy od n, jeśli n przekracza dostępne dane
 
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -87,9 +95,18 @@ void runBenchmark(Data &movieData, int n, int iterations, SortAlgorithm algo, co
         }
 
         auto end = std::chrono::high_resolution_clock::now();
-        totalTime += std::chrono::duration<double, std::milli>(end - start).count();
+        totalTime += std::chrono::duration<double, std::milli>(end - start).count(); // pomiar czasu sortowania w milisekundach
+        if (sort.isSorted(testData->data, testData->currentSize))                    // weryfikacja poprawności posortowania danych po każdej iteracji
+        {
+            std::cout << " -> Iteracja " << i + 1 << ": OK.\n";
+        }
+        else
+        {
+            std::cerr << " -> Iteracja " << i + 1 << ": NIE!!!\n";
+            std::exit(1);
+        }
 
-        if (i == iterations - 1)
+        if (i == iterations - 1) // obliczenie średniej i mediany ocen filmów tylko dla ostatniej iteracji
         {
             double sumRating = 0;
             for (int j = 0; j < testData->currentSize; j++)

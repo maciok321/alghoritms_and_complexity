@@ -1,9 +1,9 @@
 #include "Data.h"
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <string>
 #include <chrono>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 Data::Data(int maxSize)
 {
@@ -12,10 +12,7 @@ Data::Data(int maxSize)
     capacity = maxSize;
 }
 
-Data::~Data()
-{
-    delete[] data;
-}
+Data::~Data() { delete[] data; }
 
 void Data::addMovie(const std::string &name, float rating)
 {
@@ -33,7 +30,7 @@ void Data::addMovie(const std::string &name, float rating)
 
 void Data::loadAndFilterData(const std::string &filename, int limit)
 {
-    std::ifstream file(filename);
+    std::ifstream file(filename); // otwarcie pliku CSV
     if (!file.is_open())
     {
         std::cerr << "Could not open the file!" << std::endl;
@@ -41,27 +38,41 @@ void Data::loadAndFilterData(const std::string &filename, int limit)
     }
 
     std::string line;
-    std::getline(file, line); // Skip header line
+    std::getline(file, line); // pomijanie nagłówka CSV
     auto start = std::chrono::high_resolution_clock::now();
 
-    while (std::getline(file, line))
+    while (std::getline(file, line)) // czytanie każdej linii z pliku
     {
-        if (limit != -1 && currentSize >= limit)
+        if (limit != -1 &&
+            currentSize >=
+                limit) // sprawdzenie limitu, jeśli został ustawiony (potrzebne do
+                       // testow zlozonosci wczytywania danych)
         {
             break;
         }
 
-        size_t lastComma = line.find_last_of(',');
-        if (lastComma != std::string::npos)
+        size_t lastComma =
+            line.find_last_of(','); // znalezienie ostatniego przecinka, który
+                                    // oddziela nazwę filmu od oceny
+        size_t firstComma = line.find_first_of(
+            ','); // znalezienie pierwszego przecinka, który oddziela ID od nazwy
+                  // filmu (w przypadku gdy nazwa filmu zawiera przecinek)
+        if (lastComma != std::string::npos && firstComma != std::string::npos &&
+            lastComma != firstComma)
         {
-            std::string name = line.substr(0, lastComma);
-            std::string ratingString = line.substr(lastComma + 1);
+            std::string name = line.substr(
+                firstComma + 1, lastComma - firstComma -
+                                    1); // wyodrębnienie nazwy filmu, uwzględniając
+                                        // możliwość występowania przecinków w nazwie
+            std::string ratingString =
+                line.substr(lastComma + 1); // wyodrębnienie oceny filmu jako string
 
             if (!ratingString.empty())
             {
                 try
                 {
-                    float ratingValue = std::stof(ratingString);
+                    float ratingValue =
+                        std::stof(ratingString); // konwersja ze string na float
                     addMovie(name, ratingValue);
                 }
                 catch (...)
@@ -73,7 +84,8 @@ void Data::loadAndFilterData(const std::string &filename, int limit)
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
-    std::cout << "Data loading and filtering took: " << duration.count() << " seconds." << std::endl;
+    std::cout << "Data loading and filtering took: " << duration.count()
+              << " seconds." << std::endl;
     std::cout << "Loaded " << currentSize << " movies." << std::endl;
 
     file.close();

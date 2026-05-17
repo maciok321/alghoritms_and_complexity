@@ -9,6 +9,7 @@ Driver::Driver() : vertexCounts{10, 50, 100, 500, 1000},
 
 void Driver::run()
 {
+    // nowy raport od nadpisania pliku i zapisu nagłówka.
     saveHeader();
 
     for (GraphType graphType : graphTypes)
@@ -29,6 +30,7 @@ double Driver::runSingleTrial(int numVertices, double density, GraphType graphTy
     double totalTime = 0.0;
     std::vector<std::unique_ptr<Graph>> graphs;
     graphs.reserve(numOfTrials);
+    // Generacja danych wejściowych
 
     for (int i = 0; i < numOfTrials; ++i)
     {

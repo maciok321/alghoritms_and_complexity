@@ -21,12 +21,16 @@ enum class GraphType
 class GraphGenerator
 {
 public:
+    // Tworzy losowy graf skierowany i ważony o zadanej gęstości.
+    // Pętle własne nie są dodawane.
     static std::unique_ptr<Graph> generateRandomGraph(int numVertices, double density, GraphType graphType);
 private:
     static const int MIN_WEIGHT = 1;
     static const int MAX_WEIGHT = 100;
 
+    // Maksymalna liczba krawędzi w grafie skierowanym bez pętli własnych.
     static int calculateMaxEdges(int numVertices);
+    // Liczba krawędzi wynikająca z żądanej gęstości.
     static int calculateNumEdges(int numVertices, double density);
 
     static int generateRandomVertex(int numVertices);

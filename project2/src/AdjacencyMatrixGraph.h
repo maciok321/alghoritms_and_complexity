@@ -10,9 +10,9 @@
 class AdjacencyMatrixGraph : public Graph
 {
 private:
-    int numVertices;
-    std::vector<std::vector<int>> adjMatrix;
-    static constexpr int NO_EDGE = 0; // Sentinel value for no edge
+    int numVertices; // Liczba wierzchołków w grafie skierowanym.
+    std::vector<std::vector<int>> adjMatrix; // Macierz wag indeksowana jako [z][do].
+    static constexpr int NO_EDGE = 0; // Wartość oznaczająca brak krawędzi.
 
 public:
     explicit AdjacencyMatrixGraph(int numVertices);

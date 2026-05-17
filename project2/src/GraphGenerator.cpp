@@ -27,7 +27,7 @@ std::unique_ptr<Graph> GraphGenerator::generateRandomGraph(int numVertices, doub
 
     if (density >= 1.0)
     {
-        // For a complete graph, add all possible edges
+        // Dla pełnej gęstości dodać wszystkie możliwe krawędzie poza pętlami własnymi.
         for (int u = 0; u < numVertices; ++u)
         {
             for (int v = 0; v < numVertices; ++v)
@@ -46,9 +46,10 @@ std::unique_ptr<Graph> GraphGenerator::generateRandomGraph(int numVertices, doub
     {
         int u = generateRandomVertex(numVertices);
         int v = generateRandomVertex(numVertices);
-
+        
+        // odrzucanie losowania, które dają pętle własne lub duplikaty krawędzi.
         if (u == v || graph->hasEdge(u, v))
-            continue; // Skip self-loops and duplicate edges
+            continue; // pomijane pętle własne i zduplikowane krawędzie.
 
         graph->addEdge(u, v, generateRandomWeight());
         addedEdges++;
@@ -59,7 +60,7 @@ std::unique_ptr<Graph> GraphGenerator::generateRandomGraph(int numVertices, doub
 
 int GraphGenerator::calculateMaxEdges(int numVertices)
 {
-    return (numVertices * (numVertices - 1)); // For directed graph
+    return (numVertices * (numVertices - 1)); // Dla grafu skierowanego bez pętli własnych.
 }
 
 int GraphGenerator::calculateNumEdges(int numVertices, double density)

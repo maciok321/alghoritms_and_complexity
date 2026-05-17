@@ -3,6 +3,7 @@
 void Menu::runMenu()
 {
     int choice = 0;
+    // Powtarzanie menu, dopóki użytkownik nie wybierze opcji wyjścia.
     while (choice != 4)
     {
         displayMenu();
@@ -43,6 +44,7 @@ void Menu::printDistances(const std::vector<int>& distances) const
     for (int i = 0; i < static_cast<int>(distances.size()); ++i)
     {
         std::cout << "Source -> " << i << ": ";
+        // Dla nieosiągalnych wierzchołków Dijkstra zwraca maksymalną wartość int.
 
         if (distances[i] == std::numeric_limits<int>::max())
             std::cout << "Vertex " << i << " is unreachable from the source." << std::endl;
@@ -90,6 +92,7 @@ void Menu::runDemoAdjacencyList()
 void Menu::runExperiment()
 {
     std::cout << "Running Experiment..." << std::endl;
+    // Driver odpowiada za konfigurację i wykonanie wszystkich pomiarów.
     Driver driver;
     driver.run();
     std::cout << "Experiment completed. Results saved to results.csv" << std::endl;

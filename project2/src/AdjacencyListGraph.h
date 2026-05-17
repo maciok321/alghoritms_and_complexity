@@ -10,8 +10,8 @@
 class AdjacencyListGraph : public Graph
 {
 private:
-    int numVertices;
-    std::vector<std::vector<std::pair<int, int>>> adjList; // pair<neighbor, weight>
+    int numVertices; // Liczba wierzchołków w grafie skierowanym.
+    std::vector<std::vector<std::pair<int, int>>> adjList; // Dla każdego wierzchołka: para <sąsiad, waga>.
 
 public:
     explicit AdjacencyListGraph(int numVertices);

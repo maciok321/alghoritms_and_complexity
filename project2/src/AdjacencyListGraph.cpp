@@ -14,6 +14,7 @@ int AdjacencyListGraph::getWeight(int u, int v) const
 {
     if (u < 0 || u >= numVertices || v < 0 || v >= numVertices)
         throw std::out_of_range("Vertex index out of range");
+    // Przeszukanie krawędzi wychodzących z u, aby znaleźć krawędź u -> v.
 
     for (const auto& neighbor : adjList[u])
     {
@@ -61,11 +62,13 @@ void AdjacencyListGraph::addEdge(int u, int v, int weight)
     {
         if (neighbor.first == v)
         {
+            // aktualizacja wagi istniejącej krawędzi u -> v
             neighbor.second = weight;
 
             return;
         }
     }
+    // jeśli krawędzi nie było, dodaje nową parę (sąsiad, waga).
     adjList[u].emplace_back(v, weight);
 }
 

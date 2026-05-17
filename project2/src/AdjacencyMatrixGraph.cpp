@@ -2,6 +2,7 @@
 
 AdjacencyMatrixGraph::AdjacencyMatrixGraph(int numVertices) : numVertices(numVertices)
 {
+    // Na starcie między każdą parą wierzchołków brak krawędzi.
     adjMatrix = std::vector<std::vector<int>>(numVertices, std::vector<int>(numVertices, NO_EDGE));
 }
 
@@ -56,6 +57,7 @@ std::vector<std::pair<int, int>> AdjacencyMatrixGraph::getNeighbors(int vertex) 
         throw std::out_of_range("Vertex index out of range");
 
     std::vector<std::pair<int, int>> neighbors;
+    // wszystkie krawędzie wychodzące z podanego wierzchołka.
     for (int j = 0; j < numVertices; ++j)
     {
         if (adjMatrix[vertex][j] != NO_EDGE)

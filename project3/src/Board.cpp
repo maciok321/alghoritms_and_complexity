@@ -52,11 +52,13 @@ void Board::setPiece(int row, int col, const Piece& piece)
     board[row][col] = piece;
 }
 
-void Board::makeMove(const Move& move)
+Piece Board::makeMove(const Move& move)
 {
+    Piece capturedPiece = getPiece(move.toRow, move.toCol);
     Piece piece = getPiece(move.fromRow, move.fromCol);
     setPiece(move.toRow, move.toCol, piece);
     setPiece(move.fromRow, move.fromCol, Piece());
+    return capturedPiece;
 }
 
 void Board::undoMove(const Move& move, Piece capturedPiece)
@@ -114,5 +116,5 @@ void Board::printBoard() const
         }
         std::cout << std::endl;
     }
-    std::cout << "  a b c d e f g h" << std::endl;
+    std::cout << "  A B C D E F G H" << std::endl;
 }

@@ -30,6 +30,7 @@ public:
     
     void printBoard() const;
     
+    Piece findKingPosition(PieceColor color, int& kingRow, int& kingCol) const;
 private:
     std::array<std::array<Piece, SIZE>, SIZE> board;
 };

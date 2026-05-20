@@ -10,9 +10,11 @@
 class MoveGenerator
 {
 public:
-    static std::vector<Move> generateMoves(const Board& board, PieceColor color);
+    static std::vector<Move> generateMoves(Board& board, PieceColor color);
+    static std::vector<Move> generatePseudoLegalMoves(const Board& board, PieceColor color);
 
 private:
+    static bool isKingInCheck(const Board& board, PieceColor color);
     static void generatePawnMoves(const Board& board, int row, int col, PieceColor color, std::vector<Move>& moves);
     static void generateKnightMoves(const Board& board, int row, int col, PieceColor color, std::vector<Move>& moves);
     static void generateBishopMoves(const Board& board, int row, int col, PieceColor color, std::vector<Move>& moves);

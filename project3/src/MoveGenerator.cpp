@@ -1,7 +1,48 @@
 #include "MoveGenerator.h"
 
 
-std::vector<Move> MoveGenerator::generateMoves(const Board& board, PieceColor color)
+bool MoveGenerator::isKingInCheck(const Board& board, PieceColor color)
+{
+    // Find the king's position
+    int kingRow, kingCol;
+    Piece kingPiece = board.findKingPosition(color, kingRow, kingCol);
+    if (kingPiece.type == PieceType::None)
+    {
+        return false; // King not found
+    }
+
+    // Check if the king is in check by any opponent piece
+    PieceColor opponentColor = oppositeColor(color);
+    std::vector<Move> opponentMoves = generatePseudoLegalMoves(board, opponentColor);
+    for (const Move& move : opponentMoves)
+    {
+        if (move.toRow == kingRow && move.toCol == kingCol)
+        {
+            return true; // King is in check
+        }
+    }
+    return false; // King is safe
+}
+
+std::vector<Move> MoveGenerator::generateMoves(Board& board, PieceColor color)
+{
+    std::vector<Move> pseudoLegalMoves = generatePseudoLegalMoves(board, color);
+    std::vector<Move> legalMoves;
+
+    for (const Move& move : pseudoLegalMoves)
+    {
+        Piece capturedPiece = board.makeMove(move);
+        if (!isKingInCheck(board, color))
+        {
+            legalMoves.push_back(move);
+        }
+        board.undoMove(move, capturedPiece);
+    }
+
+    return legalMoves;
+}
+
+std::vector<Move> MoveGenerator::generatePseudoLegalMoves(const Board& board, PieceColor color)
 {
     std::vector<Move> moves;
     for (int row = 0; row < Board::SIZE; row++)

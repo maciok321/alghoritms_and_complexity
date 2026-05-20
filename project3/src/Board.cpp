@@ -6,6 +6,24 @@ Board::Board()
     setupInitialPosition();
 }
 
+Piece Board::findKingPosition(PieceColor color, int& kingRow, int& kingCol) const
+{
+    for (int row = 0; row < Board::SIZE; row++)
+    {
+        for (int col = 0; col < Board::SIZE; col++)
+        {
+            Piece piece = getPiece(row, col);
+            if (piece.type == PieceType::King && piece.color == color)
+            {
+                kingRow = row;
+                kingCol = col;
+                return piece;
+            }
+        }
+    }
+    return Piece(); // Return an empty piece if the king is not found (should never happen in a valid game)
+}
+
 void Board::setupInitialPosition()
 {
     // Clear the board

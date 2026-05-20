@@ -4,8 +4,9 @@
 #include "MoveGenerator.h"
 #include <algorithm>
 #include <sstream>
+#include <chrono>
 
-Game::Game() : currentPlayer(PieceColor::White){}
+Game::Game() : currentPlayer(PieceColor::White), humanPlayer(PieceColor::White), ai(PieceColor::Black, 3) {}
 
 bool Game::parseMove(const std::string& from, const std::string& to, Move& move)
 {
@@ -35,6 +36,16 @@ bool Game::parseMove(const std::string& from, const std::string& to, Move& move)
     return false;
 }
 
+std::string Game::moveToString(const Move& move)
+{
+    char fromCol = 'a' + move.fromCol;
+    char fromRow = '1' + move.fromRow;
+    char toCol = 'a' + move.toCol;
+    char toRow = '1' + move.toRow;
+
+    return std::string() + fromCol + fromRow + " " + toCol + toRow;
+}
+
 void Game::switchPlayer()
 {
     currentPlayer = (currentPlayer == PieceColor::White) ? PieceColor::Black : PieceColor::White;
@@ -54,41 +65,56 @@ void Game::runCommandLineInterface()
 
     while (true)
     {
-        std::cout << (currentPlayer == PieceColor::White ? "White" : "Black") << "'s turn. Enter your move (e.g., e2 e4), or 'exit': ";
-
-        std::getline(std::cin, input);
-
-        if (input == "exit")
+        if (currentPlayer == ai.aiColor)
         {
-            std::cout << "Exiting game." << std::endl;
-            break;
-        }
-
-        std::istringstream iss(input);
-        std::string from, to;
-
-        if (!(iss >> from >> to))
-        {
-            std::cerr << "Invalid input. Use format like 'e2 e4'." << std::endl;
-            continue;
-        }
-
-        Move move(0, 0, 0, 0);
-
-        if (!parseMove(from, to, move))
-        {
-            continue;
-        }
-
-        if (isMoveLegal(move))
-        {
-            board.makeMove(move);
+            auto start = std::chrono::high_resolution_clock::now();
+            Move bestMove = ai.findBestMove(board);
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double, std::milli> duration = end - start;
+            board.makeMove(bestMove);
+            std::cout << "Nodes visited: " << ai.getNodesVisited() << " AI plays: " << moveToString(bestMove) << " Time taken: " << duration.count() << " ms" << std::endl;
             board.printBoard();
             switchPlayer();
+            continue;
         }
-        else
-        {
-            std::cerr << "Illegal move. Try again." << std::endl;
+
+        else{
+                std::cout << "Enter your move (e.g., 'e2 e4') or 'exit' to quit: ";
+            
+            std::getline(std::cin, input);
+
+            if (input == "exit")
+            {
+                std::cout << "Exiting game." << std::endl;
+                break;
+            }
+
+            std::istringstream iss(input);
+            std::string from, to;
+
+            if (!(iss >> from >> to))
+            {
+                std::cerr << "Invalid input. Use format like 'e2 e4'." << std::endl;
+                continue;
+            }
+
+            Move move(0, 0, 0, 0);
+
+            if (!parseMove(from, to, move))
+            {
+                continue;
+            }
+
+            if (isMoveLegal(move))
+            {
+                board.makeMove(move);
+                board.printBoard();
+                switchPlayer();
+            }
+            else
+            {
+                std::cerr << "Illegal move. Try again." << std::endl;
+            }
         }
     }
 }

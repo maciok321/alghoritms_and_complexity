@@ -20,7 +20,8 @@ private:
 
     sf::Font font;
     char pieceToChar(const Piece& piece) const;
-
+    std::string getTextureKey(const Piece& piece) const;
+    void loadTextures();
 };
 
 #endif

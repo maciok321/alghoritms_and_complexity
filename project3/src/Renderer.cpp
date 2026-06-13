@@ -5,10 +5,7 @@
 
 Renderer::Renderer()
 {
-    if(!font.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf")) // Załaduj font tylko raz
-    {
-        std::cerr << "Failed to load font!" << std::endl;
-    }
+    loadTextures();
 }
 
 char Renderer::pieceToChar(const Piece& piece) const
@@ -45,18 +42,64 @@ void Renderer::draw(sf::RenderWindow& window, const Board& board)
 
             // Rysuj figurę jako literę
             Piece piece = board.getPiece(boardRow, boardCol);
-            if (piece.type != PieceType::None)
+
+            if (!piece.isEmpty())
             {
-                char letter = pieceToChar(piece);
-                sf::Text text(font);
-                text.setString(std::string(1, letter));
-                text.setCharacterSize(static_cast<unsigned int>(squareSize * 0.6f));
-                text.setFillColor(piece.color == PieceColor::White ? sf::Color::White : sf::Color::Black);
-                sf::FloatRect textRect = text.getLocalBounds();
-                text.setOrigin({textRect.position.x + textRect.size.x / 2.0f, textRect.position.y + textRect.size.y / 2.0f});
-                text.setPosition({screenCol * squareSize + squareSize / 2.0f, screenRow * squareSize + squareSize / 2.0f});
-                window.draw(text);
+                std::string key = getTextureKey(piece);
+                sf::Sprite sprite(pieceTextures.at(key));
+
+                float scaleX = squareSize / sprite.getTexture().getSize().x;
+                float scaleY = squareSize / sprite.getTexture().getSize().y;
+
+                sprite.setScale({scaleX, scaleY});
+                sprite.setPosition({screenCol * squareSize, screenRow * squareSize});
+
+                window.draw(sprite);
             }
+        }
+    }
+}
+
+
+std::string Renderer::getTextureKey(const Piece& piece) const
+{
+    std::string colorPrefix = (piece.color == PieceColor::White) ? "white_" : "black_";
+    std::string typeName;
+
+    switch (piece.type)
+    {
+        case PieceType::Pawn:   typeName = "pawn"; break;
+        case PieceType::Knight: typeName = "knight"; break;
+        case PieceType::Bishop: typeName = "bishop"; break;
+        case PieceType::Rook:   typeName = "rook"; break;
+        case PieceType::Queen:  typeName = "queen"; break;
+        case PieceType::King:   typeName = "king"; break;
+        default: return "";
+    }
+
+    return colorPrefix + typeName;
+}
+
+
+void Renderer::loadTextures()
+{
+    std::string basePath = "../assets/"; // Ścieżka do katalogu z teksturami
+    std::vector<std::string> pieceTypes = {"pawn", "knight", "bishop", "rook", "queen", "king"};
+    std::vector<std::string> colors = {"white", "black"};
+
+    for (const auto& color : colors)
+    {
+        for (const auto& type : pieceTypes)
+        {
+            std::string key = color + "_" + type;
+            std::string filePath = basePath + key + ".png";
+            sf::Texture texture;
+            if (!texture.loadFromFile(filePath))
+            {
+                std::cerr << "Failed to load texture: " << filePath << std::endl;
+                continue;
+            }
+            pieceTextures[key] = texture;
         }
     }
 }

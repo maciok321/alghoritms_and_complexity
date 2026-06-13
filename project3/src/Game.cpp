@@ -5,8 +5,11 @@
 #include <algorithm>
 #include <sstream>
 #include <chrono>
+#include <SFML/Graphics.hpp>
+#include "Renderer.h"
+#include <optional>
 
-Game::Game() : currentPlayer(PieceColor::White), humanPlayer(PieceColor::White), ai(PieceColor::Black, 3) {}
+Game::Game() : currentPlayer(PieceColor::White), humanPlayer(PieceColor::White), aiPlayer(PieceColor::Black), ai(aiPlayer, 4) {}
 
 bool Game::parseMove(const std::string& from, const std::string& to, Move& move)
 {
@@ -65,8 +68,8 @@ void Game::runCommandLineInterface()
 
     while (true)
     {
-        if (currentPlayer == ai.aiColor)
-        {
+        if (currentPlayer == aiPlayer)
+        {   
             auto start = std::chrono::high_resolution_clock::now();
             Move bestMove = ai.findBestMove(board);
             auto end = std::chrono::high_resolution_clock::now();
@@ -116,5 +119,148 @@ void Game::runCommandLineInterface()
                 std::cerr << "Illegal move. Try again." << std::endl;
             }
         }
+    }
+}
+
+void Game::runGraphicalInterface()
+{
+    Renderer renderer;
+    sf::RenderWindow window(sf::VideoMode({800, 800}), "Chess Minimax");
+
+    int selectedRow = -1;
+    int selectedCol = -1;
+    bool pieceSelected = false;
+
+    while (window.isOpen())
+    {
+        // 1. Jeśli teraz ruch AI, wykonaj go poza obsługą eventów
+        if (currentPlayer == aiPlayer)
+        {
+            // zmierz czas, jeśli chcesz
+            // Move aiMove = ai.findBestMove(board);
+            // board.makeMove(aiMove);
+            // switchPlayer();
+            // pieceSelected = false;
+            std::vector<Move> aiMoves = MoveGenerator::generateMoves(board, aiPlayer);
+            if (aiMoves.empty())
+            {
+                if (MoveGenerator::isKingInCheck(board, aiPlayer))
+                {
+                    std::cout << "Checkmate! Human wins!" << std::endl;
+                }
+                else
+                {
+                    std::cout << "Stalemate! It's a draw!" << std::endl;
+                }
+                window.close();
+                continue;
+            }
+
+            auto start = std::chrono::high_resolution_clock::now();
+            Move bestMove = ai.findBestMove(board);
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double, std::milli> duration = end - start;
+
+            board.makeMove(bestMove);
+
+            std::cout << "Nodes visited: " << ai.getNodesVisited() << " AI plays: " << moveToString(bestMove) << " Time taken: " << duration.count() << " ms" << std::endl;
+            
+            board.printBoard();
+            
+            switchPlayer();
+
+            std::vector<Move> humanMoves = MoveGenerator::generateMoves(board, humanPlayer);
+            if (humanMoves.empty())
+            {
+                if (MoveGenerator::isKingInCheck(board, humanPlayer))
+                {
+                    std::cout << "Checkmate! AI wins!" << std::endl;
+                }
+                else
+                {
+                    std::cout << "Stalemate! It's a draw!" << std::endl;
+                }
+                window.close();
+                continue;
+            }
+
+            pieceSelected = false;
+            selectedRow = -1;
+            selectedCol = -1;
+        }
+
+        // 2. Obsługa eventów SFML 3
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+            {
+                window.close();
+            }
+
+            if (const auto* mouseButton = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                if (mouseButton->button != sf::Mouse::Button::Left)
+                {
+                    continue;
+                }
+
+                if (currentPlayer != humanPlayer)
+                {
+                    continue;
+                }
+
+                float squareSize = window.getSize().x / 8.0f;
+
+                int screenCol = static_cast<int>(mouseButton->position.x / squareSize);
+                int screenRow = static_cast<int>(mouseButton->position.y / squareSize);
+
+                int boardCol = screenCol;
+                int boardRow = 7 - screenRow;
+
+                if (!board.isInsideBoard(boardRow, boardCol))
+                {
+                    continue;
+                }
+
+                if (!pieceSelected)
+                {
+                    // pobierz figurę
+                    // jeśli należy do currentPlayer:
+                    //     zapamiętaj selectedRow, selectedCol
+                    //     pieceSelected = true
+                    Piece piece = board.getPiece(boardRow, boardCol);
+                    if (piece.isEmpty() || piece.color != currentPlayer)
+                    {
+                        continue;
+                    }
+                    selectedRow = boardRow;
+                    selectedCol = boardCol;
+                    pieceSelected = true;
+
+                }
+                else
+                {
+                    // utwórz Move(selectedRow, selectedCol, boardRow, boardCol)
+                    // jeśli isMoveLegal(move):
+                    //     board.makeMove(move)
+                    //     switchPlayer()
+                    //
+                    // niezależnie od wyniku:
+                    //     pieceSelected = false
+
+                    Move move(selectedRow, selectedCol, boardRow, boardCol);
+                    if (isMoveLegal(move))
+                    {
+                        board.makeMove(move);
+                        switchPlayer();
+                    }
+                    pieceSelected = false;
+                }
+            }
+        }
+
+        window.clear();
+        renderer.draw(window, board);
+        window.display();
     }
 }

@@ -14,10 +14,11 @@ public:
     Board board;
     PieceColor currentPlayer;
     PieceColor humanPlayer;
+    PieceColor aiPlayer;
     AI ai;
 
     void runCommandLineInterface();
-
+    void runGraphicalInterface();
 private:
     bool parseMove(const std::string& from, const std::string& to, Move& move);
     std::string moveToString(const Move& move);

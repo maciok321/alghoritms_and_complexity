@@ -31,12 +31,12 @@ std::vector<Move> MoveGenerator::generateMoves(Board& board, PieceColor color)
 
     for (const Move& move : pseudoLegalMoves)
     {
-        Piece capturedPiece = board.makeMove(move);
+        MoveState state = board.makeMove(move);
         if (!isKingInCheck(board, color))
         {
             legalMoves.push_back(move);
         }
-        board.undoMove(move, capturedPiece);
+        board.undoMove(move, state);
     }
 
     return legalMoves;

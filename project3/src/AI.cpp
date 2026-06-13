@@ -15,9 +15,9 @@ Move AI::findBestMove(Board& board)
     std::vector<Move> legalMoves = MoveGenerator::generateMoves(board, aiColor);
     for (const Move& move : legalMoves)
     {
-        Piece capturedPiece = board.makeMove(move);
+        MoveState state = board.makeMove(move);
         int moveValue = minimax(board, searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), (aiColor == PieceColor::White) ? PieceColor::Black : PieceColor::White);
-        board.undoMove(move, capturedPiece);
+        board.undoMove(move, state);
 
         if ((aiColor == PieceColor::White && moveValue > bestValue) || (aiColor == PieceColor::Black && moveValue < bestValue))
         {
@@ -51,16 +51,23 @@ int AI::minimax(Board& board, int depth, int alpha, int beta, PieceColor current
     std::vector<Move> legalMoves = MoveGenerator::generateMoves(board, currentPlayer);
     if (legalMoves.empty())
     {
-        return Evaluator::evaluateBoard(board);
+        if (MoveGenerator::isKingInCheck(board, currentPlayer))
+        {
+            return (currentPlayer == PieceColor::White) ? -CHECKMATE_SCORE : CHECKMATE_SCORE; // Checkmate
+        }
+        else
+        {
+            return 0; // Stalemate
+        }
     }
 
     int bestValue = (currentPlayer == PieceColor::White) ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
 
     for (const Move& move : legalMoves)
     {
-        Piece capturedPiece = board.makeMove(move);
+        MoveState state = board.makeMove(move);
         int moveValue = minimax(board, depth - 1, alpha, beta, (currentPlayer == PieceColor::White) ? PieceColor::Black : PieceColor::White);
-        board.undoMove(move, capturedPiece);
+        board.undoMove(move, state);
 
         if (currentPlayer == PieceColor::White)
         {

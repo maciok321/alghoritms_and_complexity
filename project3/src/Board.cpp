@@ -70,20 +70,36 @@ void Board::setPiece(int row, int col, const Piece& piece)
     board[row][col] = piece;
 }
 
-Piece Board::makeMove(const Move& move)
+MoveState Board::makeMove(const Move& move)
 {
-    Piece capturedPiece = getPiece(move.toRow, move.toCol);
-    Piece piece = getPiece(move.fromRow, move.fromCol);
-    setPiece(move.toRow, move.toCol, piece);
+    MoveState state;
+    state.capturedPiece = getPiece(move.toRow, move.toCol);
+    state.movedPiece = getPiece(move.fromRow, move.fromCol);
+
+    Piece pieceToPlace = state.movedPiece;
+
+    if (state.movedPiece.type == PieceType::Pawn)
+    {
+        if(state.movedPiece.color == PieceColor::White && move.toRow == 7)
+        {
+            pieceToPlace = Piece(PieceType::Queen, PieceColor::White);
+        }
+        else if(state.movedPiece.color == PieceColor::Black && move.toRow == 0)
+        {
+            pieceToPlace = Piece(PieceType::Queen, PieceColor::Black);
+        }
+    }
+
+    setPiece(move.toRow, move.toCol, pieceToPlace);
     setPiece(move.fromRow, move.fromCol, Piece());
-    return capturedPiece;
+
+    return state;
 }
 
-void Board::undoMove(const Move& move, Piece capturedPiece)
+void Board::undoMove(const Move& move, const MoveState& state)
 {
-    Piece piece = getPiece(move.toRow, move.toCol);
-    setPiece(move.fromRow, move.fromCol, piece);
-    setPiece(move.toRow, move.toCol, capturedPiece);
+    setPiece(move.fromRow, move.fromCol, state.movedPiece);
+    setPiece(move.toRow, move.toCol, state.capturedPiece);
 }
 
 bool Board::isInsideBoard(int row, int col) const

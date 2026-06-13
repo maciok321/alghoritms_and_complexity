@@ -23,6 +23,7 @@ public:
 private:
     int searchDepth;
     long long nodesVisited;
+    const int CHECKMATE_SCORE = 1000000;
 
     int minimax(Board& board, int depth, int alpha, int beta, PieceColor currentPlayer);
 };

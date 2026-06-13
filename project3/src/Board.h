@@ -7,6 +7,12 @@
 #include "Piece.h"
 #include "Move.h"
 
+struct MoveState
+{
+    Piece capturedPiece;
+    Piece movedPiece;
+};
+
 class Board
 {
     
@@ -25,8 +31,8 @@ public:
     bool isOpponentPiece(int row, int col, PieceColor color) const;
     bool isOwnPiece(int row, int col, PieceColor color) const;
     
-    Piece makeMove(const Move& move);
-    void undoMove(const Move& move, Piece capturedPiece);
+    MoveState makeMove(const Move& move);
+    void undoMove(const Move& move, const MoveState& state);
     
     void printBoard() const;
     
